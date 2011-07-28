@@ -1037,7 +1037,8 @@ AutoLabels = ( &{ !extension(EXT_COMPATIBILITY) }
             | SkipBlock )*
             { labels = a; })
 
-DefinitionList =  a:StartList (
+DefinitionList =  a:StartList &(TermLine+ ':')
+                (
                     (Term { a = cons($$, a); } )+
                     (Definition { a = cons($$, a);})+
                     BlankLine*
@@ -1045,6 +1046,8 @@ DefinitionList =  a:StartList (
                 { $$ = mk_list(LIST, a);
                     $$->key = DEFLIST;
                 }
+
+TermLine = !':' !BlankLine (!Newline .)* Newline
 
 Term =  a:StartList !BlankLine !':'
         (!Newline !Endline Inline {a = cons($$, a);} )+ Newline
