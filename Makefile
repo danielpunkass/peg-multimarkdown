@@ -4,6 +4,20 @@ VERSION=3.0.dev
 
 PROGRAM=multimarkdown
 
+UNAME=$(shell uname)
+
+ifeq ($(UNAME), Darwin)
+define FINALNOTES
+ ***\n\
+*** WARNING: Since you are on Darwin, you probably meant to use the Xcode version instead.\n\
+*** It does lots of nice magic like producing a version of the binary that is capable\n\
+*** of running on multiple versions of Mac OS X and with a variety of CPU architectures.\n\
+***
+endef
+else
+	FINALNOTES=Build complete.
+endif
+	
 CFLAGS ?= -Wall -O3 -ansi -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1
 
 OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
@@ -18,6 +32,7 @@ $(LEG):
 
 $(PROGRAM) : markdown.c $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $<
+	@echo "$(FINALNOTES)"
 
 markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
 	$(LEG) -o $@ $<
