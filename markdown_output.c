@@ -349,7 +349,7 @@ static void print_html_element(GString *out, element *elt, bool obfuscate) {
         g_string_append_printf(out, "<p>");
         print_html_element_list(out, elt->children, obfuscate);
 		if (am_printing_html_footnote && ( elt->next == NULL)) {
-			g_string_append_printf(out, " <a href=\"#fnref:%d\" title=\"return to article\" class=\"reversefootnote\">&#160;&#8617;</a>", footnote_counter_to_print);
+			g_string_append_printf(out, " <a href=\"#fnref:%d\" title=\"return to article\" class=\"reversefootnote\">&#8617;</a>", footnote_counter_to_print);
 			/* Only print once. For now, it's the first paragraph, until
 				I can figure out to make it the last paragraph */
 			am_printing_html_footnote = FALSE;
@@ -428,10 +428,10 @@ static void print_html_element(GString *out, element *elt, bool obfuscate) {
                 /* Assign footnote number for future use */
                 elt->children->contents.str = strdup(buf);
                 if (elt->children->key == GLOSSARYTERM) {
-                    g_string_append_printf(out, "<a href=\"#fn:%d\" id=\"fnref:%d\" title=\"see footnote\" class=\"footnote glossary\">[%d]</a>",
+                    g_string_append_printf(out, "<sup id=\"fnref:%d\"><a href=\"#fn:%d\" title=\"see footnote\" class=\"footnote glossary\">%d</a></sup>",
                                 notenumber, notenumber, notenumber);
                 } else {
-                    g_string_append_printf(out, "<a href=\"#fn:%d\" id=\"fnref:%d\" title=\"see footnote\" class=\"footnote\">[%d]</a>",
+                    g_string_append_printf(out, "<sup id=\"fnref:%d\"><a href=\"#fn:%d\" title=\"see footnote\" class=\"footnote\">%d</a></sup>",
                                 notenumber, notenumber, notenumber);
                 }
             } else {
