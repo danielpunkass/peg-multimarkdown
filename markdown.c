@@ -37,7 +37,7 @@ static int extensions;
 
  ***********************************************************************/
 
-#define VERSION "3.0.dev-redsweater"
+#define VERSION "3.1b1-redsweater"
 #define COPYRIGHT "portions Copyright (c) 2010-2011 Fletcher T. Penney.\n" \
 				  "portions Copyright (c) 2011 Daniel Jalkut, MIT licensed.\n" \
                   "original Copyright (c) 2008-2009 John MacFarlane.  License GPLv2+ or MIT.\n" \
@@ -117,6 +117,7 @@ int main(int argc, char * argv[]) {
     static gboolean opt_compatibility = FALSE;
     static gboolean opt_batchmode = FALSE;
     static gchar *opt_extract_meta = FALSE;
+    static gboolean opt_no_labels = FALSE;
 
 	static struct option entries[] =
 	{
@@ -203,13 +204,16 @@ int main(int argc, char * argv[]) {
         extensions = extensions | EXT_FILTER_HTML;
     if (opt_filter_styles)
         extensions = extensions | EXT_FILTER_STYLES;
+    if (opt_no_labels)
+        extensions = extensions | EXT_NO_LABELS;
 
     /* Compatibility mode turns off extensions and most 
         MultiMarkdown-specific features */
-    if (opt_compatibility)
+    if (opt_compatibility) {
         extensions = 0x000000;
-    if (opt_compatibility)
         extensions = extensions | EXT_COMPATIBILITY;
+        extensions = extensions | EXT_NO_LABELS;
+    }
 
     if (opt_to == NULL)
         output_format = HTML_FORMAT;

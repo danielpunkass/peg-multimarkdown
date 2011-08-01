@@ -993,7 +993,7 @@ RawCitationReference = "[#" < ( !Newline !']' . )+ > ']'
                    { $$ = mk_str(yytext); }
 
 
-AutoLabels = ( &{ !extension(EXT_COMPATIBILITY) }
+AutoLabels = ( &{ !extension(EXT_COMPATIBILITY) && !extension(EXT_NO_LABELS)}
 	a:StartList ( b:Heading
             { 
                 GString *label = g_string_new("");

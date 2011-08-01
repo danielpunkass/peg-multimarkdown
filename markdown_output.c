@@ -1718,6 +1718,7 @@ void print_odf_element(GString *out, element *elt) {
     char *label;
     char *height;
     char *width;
+    element *locator = NULL;
     int old_type = 0;
     switch (elt->key) {
     case SPACE:
