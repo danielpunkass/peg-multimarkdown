@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "glib.h"
+#include <glib.h>
 #include "markdown_peg.h"
 #include "utility_functions.c"
 #include "odf.c"
@@ -36,6 +36,7 @@ static char cell_type = 'd';
 static int language = ENGLISH;
 static bool html_footer = FALSE;
 static int odf_type = 0;
+static bool in_list = FALSE;
 static bool no_latex_footnote = FALSE;
 static bool am_printing_html_footnote = FALSE;
 static int footnote_counter_to_print = 0;
@@ -459,6 +460,9 @@ static void print_html_element(GString *out, element *elt, bool obfuscate) {
         break;
     case NOCITATION:
     case CITATION:
+        /* Get locator, if present */
+        locator = locator_for_citation(elt);
+
         if (strncmp(elt->contents.str,"[#",2) == 0) {
             /* reference specified externally */
             if ( elt->key == NOCITATION ) {
@@ -1989,6 +1993,9 @@ void print_odf_element(GString *out, element *elt) {
         break;
     case NOCITATION:
     case CITATION:
+        /* Get locator, if present */
+        locator = locator_for_citation(elt);
+
         if (strncmp(elt->contents.str,"[#",2) == 0) {
             /* reference specified externally, so just display it */
             g_string_append_printf(out, "%s", elt->contents.str);
@@ -2294,6 +2301,8 @@ void print_memoir_element_list(GString *out, element *list) {
 
 /* print_memoir_element - print an element as LaTeX for memoir class */
 static void print_memoir_element(GString *out, element *elt) {
+    int lev;
+    char *label;
     switch (elt->key) {
     case VERBATIM:
         pad(out, 1);
