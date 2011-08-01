@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <getopt.h>
 #include <glib.h>
 #include "markdown_peg.h"
 
@@ -52,32 +53,8 @@ void version(const char *progname)
          COPYRIGHT);
 }
 
-/* We like to use getopt on the standalone Mac version, because
- * it rids us of dependency on GLib's GOptions parser. But you 
- * might want to use this on other platforms that support getopt, too.
- */
- 
-#ifndef MD_USE_GET_OPT
-#if STANDALONE_MAC_VERSION
-#define MD_USE_GET_OPT	1
-#else
-#define MD_USE_GET_OPT	0
-#endif
-#endif
-
-/* These are a bit hacky - note that the supplied arguments are not used to the fullest in the getopt case. For 
- * example we aren't able to use the specified description or in the case of strings, any specified output
- * variables for the resulting string, we have to just catch those at processing time and create the strings.
- */
- 
-#if MD_USE_GET_OPT
-#include <getopt.h>
 #define MD_ARGUMENT_FLAG(name, flagChar, flagValue, outPointer, desc, argPlaceholder)	{ name, no_argument, outPointer, outPointer ? flagValue : flagChar }
 #define MD_ARGUMENT_STRING(name, flagChar, outPointer, desc, argPlaceholder)	{ name, required_argument, NULL, flagChar }
-#else
-#define MD_ARGUMENT_FLAG(name, flagChar, outPointer, desc, argPlaceholder)	{ name, flagChar, 0, G_OPTION_ARG_NONE, outPointer, desc, argPlaceholder }
-#define MD_ARGUMENT_STRING(name, flagChar, outPointer, desc, argPlaceholder)	{ name, flagChar, 0, G_OPTION_ARG_STRING, outPointer, desc, argPlaceholder }
-#endif
 
 /* With getopt we don't get the same fancy automatic usage (I don't think?) so for now we're faking it ... */
 static void printUsage() {
@@ -141,14 +118,9 @@ int main(int argc, char * argv[]) {
     static gboolean opt_batchmode = FALSE;
     static gchar *opt_extract_meta = FALSE;
 
-#if MD_USE_GET_OPT
 	static struct option entries[] =
 	{
 	  MD_ARGUMENT_FLAG( "help", 'h', 1, NULL, "Show help options", NULL ),
-#else
-	static GOptionEntry entries[] =
-	{	
-#endif	
 	  MD_ARGUMENT_FLAG( "version", 'v', 1, &opt_version, "print version and exit", NULL ),
       MD_ARGUMENT_STRING( "output", 'o', &opt_output, "send output to FILE (default is stdout)", "FILE" ),
       MD_ARGUMENT_STRING( "to", 't', &opt_to, "convert to FORMAT (default is html)", "FORMAT" ),
@@ -158,15 +130,6 @@ int main(int argc, char * argv[]) {
       MD_ARGUMENT_FLAG( "compatibility", 'c', 1, &opt_compatibility, "markdown compatibility mode", NULL ),
       MD_ARGUMENT_FLAG( "batch", 'b', 1, &opt_batchmode, "process multiple files automatically", NULL ),
       MD_ARGUMENT_STRING( "extract", 'e', &opt_extract_meta, "extract and display specified metadata", NULL ),
-/* For GOptions, the arguments are split into two groups */
-#if !MD_USE_GET_OPT
-      { NULL }	
-	};
-	
-    /* Options to active syntax extensions.  These appear separately in --help. */
-    static GOptionEntry ext_entries[] =
-    {
-#endif
       MD_ARGUMENT_FLAG( "smart", 0, 1, &opt_smart, "use smart typography extension (on by default)", NULL ),
       MD_ARGUMENT_FLAG( "nosmart", 0, 1, &opt_no_smart, "do not use smart typography extension", NULL ),
       MD_ARGUMENT_FLAG( "notes", 0, 1, &opt_notes, "use notes extension (on by default)", NULL ),
@@ -175,7 +138,6 @@ int main(int argc, char * argv[]) {
       { NULL }
     };
 
-#if MD_USE_GET_OPT
 	char ch;
 	while ((ch = getopt_long(argc, argv, "hvo:t:xcbe:", entries, NULL)) != -1) {
 		 switch (ch) {
@@ -217,26 +179,6 @@ int main(int argc, char * argv[]) {
 	argc++;
 	argv--;
 	
-#else
-    GError *error = NULL;
-    GOptionContext *context;
-    GOptionGroup *ext_group;
-
-    context = g_option_context_new ("[FILE...]");
-    g_option_context_add_main_entries (context, entries, NULL);
-    ext_group = g_option_group_new ("extensions", "Syntax extensions", "show available syntax extensions", NULL, NULL);
-    g_option_group_add_entries (ext_group, ext_entries);
-    g_option_context_add_group (context, ext_group);
-    g_option_context_set_description (context, "Converts text in specified files (or stdin) from markdown to FORMAT.\n"
-                                               "Available FORMATs:  html, latex, memoir, beamer, odf, opml");
-    if (!g_option_context_parse (context, &argc, &argv, &error)) {
-        g_print ("option parsing failed: %s\n", error->message);
-        exit (1);
-    }
-    g_option_context_free(context);
-
-#endif
-
     /* Process command-line options and arguments. */
 
     if (opt_version) {
