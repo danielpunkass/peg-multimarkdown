@@ -642,7 +642,7 @@ ExplicitLink =  l:Label Spnl '(' Sp s:Source Spnl t:Title Sp ')'
 Source  = ( '<' < SourceContents > '>' | < SourceContents > )
           { $$ = mk_str(yytext); }
 
-SourceContents = ( ( !'(' !')' !'>' Nonspacechar )+ | '(' SourceContents ')')*
+SourceContents = ( ( !'(' !')' !'>' Nonspacechar )+ | '(' SourceContents ')')+
                  | ""
 
 Title = ( TitleSingle | TitleDouble | < "" > )
