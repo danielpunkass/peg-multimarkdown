@@ -7,4 +7,5 @@
  *
  */
 
-// Just a dummy file to keep the glib-dependent sources compiling as we would hope
+/* Just a dummy file to keep the glib-dependent sources compiling as we would hope */
+#include "GLibFacade.h"

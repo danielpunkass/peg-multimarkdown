@@ -52,9 +52,11 @@ void version(const char *progname)
          COPYRIGHT);
 }
 
-// We like to use getopt on the standalone Mac version, because 
-// it rids us of dependency on GLib's GOptions parser. But you 
-// might want to use this on other platforms that support getopt, too.
+/* We like to use getopt on the standalone Mac version, because
+ * it rids us of dependency on GLib's GOptions parser. But you 
+ * might want to use this on other platforms that support getopt, too.
+ */
+ 
 #ifndef MD_USE_GET_OPT
 #if STANDALONE_MAC_VERSION
 #define MD_USE_GET_OPT	1
@@ -63,9 +65,11 @@ void version(const char *progname)
 #endif
 #endif
 
-// These are a bit hacky - note that the supplied arguments are not used to the fullest in the getopt case. For 
-// example we aren't able to use the specified description or in the case of strings, any specified output
-// variables for the resulting string, we have to just catch those at processing time and create the strings.
+/* These are a bit hacky - note that the supplied arguments are not used to the fullest in the getopt case. For 
+ * example we aren't able to use the specified description or in the case of strings, any specified output
+ * variables for the resulting string, we have to just catch those at processing time and create the strings.
+ */
+ 
 #if MD_USE_GET_OPT
 #include <getopt.h>
 #define MD_ARGUMENT_FLAG(name, flagChar, flagValue, outPointer, desc, argPlaceholder)	{ name, no_argument, outPointer, outPointer ? flagValue : flagChar }
@@ -75,8 +79,7 @@ void version(const char *progname)
 #define MD_ARGUMENT_STRING(name, flagChar, outPointer, desc, argPlaceholder)	{ name, flagChar, 0, G_OPTION_ARG_STRING, outPointer, desc, argPlaceholder }
 #endif
 
-// With getopt we don't get the same fancy automatic usage (I don't think?) so for 
-// now we're faking it ...
+/* With getopt we don't get the same fancy automatic usage (I don't think?) so for now we're faking it ... */
 static void printUsage() {
 	printf("Usage:\
   multimarkdown [OPTION...] [FILE...]\n\
@@ -155,7 +158,7 @@ int main(int argc, char * argv[]) {
       MD_ARGUMENT_FLAG( "compatibility", 'c', 1, &opt_compatibility, "markdown compatibility mode", NULL ),
       MD_ARGUMENT_FLAG( "batch", 'b', 1, &opt_batchmode, "process multiple files automatically", NULL ),
       MD_ARGUMENT_STRING( "extract", 'e', &opt_extract_meta, "extract and display specified metadata", NULL ),
-// For GOptions, the arguments are split into two groups
+/* For GOptions, the arguments are split into two groups */
 #if !MD_USE_GET_OPT
       { NULL }	
 	};
@@ -210,7 +213,7 @@ int main(int argc, char * argv[]) {
 	 argc -= optind;
 	 argv += optind;		 
 	
-	// We expect argc and argv to still point just one below the start of remaining args
+	/* We expect argc and argv to still point just one below the start of remaining args */
 	argc++;
 	argv--;
 	

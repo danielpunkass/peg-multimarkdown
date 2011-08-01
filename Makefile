@@ -4,13 +4,9 @@ VERSION=3.0.dev
 
 PROGRAM=multimarkdown
 
-# If you used fink to install gib2-dev, it might have been compiled for
-# the i386 architecture, causing an error.  Can try adding -arch i686 to 
-# CFLAGS
+CFLAGS ?= -Wall -O3 -ansi -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1
 
-CFLAGS ?= -Wall -O3 -ansi
-
-OBJS=markdown_parser.o markdown_output.o markdown_lib.o
+OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
 PEGDIR=peg-0.1.4
 LEG=$(PEGDIR)/leg
 
@@ -18,10 +14,10 @@ $(LEG):
 	CC=gcc make -C $(PEGDIR)
 
 %.o : %.c markdown_peg.h
-	$(CC) -c `pkg-config --cflags glib-2.0` $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM) : markdown.c $(OBJS)
-	$(CC) `pkg-config --cflags glib-2.0` `pkg-config --libs glib-2.0` $(CFLAGS) -o $@ $(OBJS) $<
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $<
 
 markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
 	$(LEG) -o $@ $<

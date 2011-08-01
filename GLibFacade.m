@@ -1,15 +1,19 @@
-//
-//  GLibFacade.m
-//  MultiMarkdown
-//
-//  Created by Daniel Jalkut on 7/26/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
+/*
+ *	GLibFacade.m
+ *	MultiMarkdown
+ *	
+ *	Created by Daniel Jalkut on 7/26/11.
+ *	Copyright 2011 __MyCompanyName__. All rights reserved.
+ */
 
-#import <Foundation/Foundation.h>
-#import "GLibFacade.h"
+#include "GLibFacade.h"
 
-// GString
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+
+/* GString */
 
 #define kStringBufferStartingSize 1024
 #define kStringBufferGrowthMultiplier 2
@@ -78,7 +82,7 @@ void g_string_append(GString* baseString, char* appendedString)
 		size_t newStringLength = baseString->currentStringLength + appendedStringLength;
 		ensureStringBufferCanHold(baseString, newStringLength);
 
-		// We already know where the current string ends, so pass that as the starting address for strncat
+		/* We already know where the current string ends, so pass that as the starting address for strncat */
 		strncat(baseString->str + baseString->currentStringLength, appendedString, appendedStringLength);
 		baseString->currentStringLength = newStringLength;
 	}
@@ -123,7 +127,7 @@ void g_string_prepend(GString* baseString, char* prependedString)
 	}
 }
 
-// GSList
+/* GSList */
 
 void g_slist_free(GSList* ripList)
 {
@@ -132,19 +136,19 @@ void g_slist_free(GSList* ripList)
 	{
 		GSList* nextItem = thisListItem->next;
 		
-		// I guess we don't release the data? Non-retained memory management is hard... let's figure it out later.
+		/* I guess we don't release the data? Non-retained memory management is hard... let's figure it out later. */
 		free(thisListItem);
 		
 		thisListItem = nextItem;
 	}
 }
 
-// Currently only used for markdown_output.c endnotes printing
+/* Currently only used for markdown_output.c endnotes printing */
 GSList* g_slist_reverse(GSList* theList)
 {	
 	GSList* lastNodeSeen = NULL;
 	
-	// Iterate the list items, tacking them on to our new reversed List as we find them
+	/* Iterate the list items, tacking them on to our new reversed List as we find them */
 	GSList* listWalker = theList;
 	while (listWalker != NULL)
 	{

@@ -50,7 +50,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4AFA466113E3624F00CFA132 /* libMultiMarkdown */;
+			remoteGlobalIDString = 4AFA466113E3624F00CFA132;
 			remoteInfo = libMultiMarkdown;
 		};
 /* End PBXContainerItemProxy section */
@@ -134,9 +134,9 @@
 			isa = PBXGroup;
 			children = (
 				651A525B13E1BEFE00BCB02A /* TODO.txt */,
+				65F0B6D713DF4C6B00D0980C /* MarkdownMacPrefix.h */,
 				651A528113E1C30100BCB02A /* GLibFacade.h */,
 				651A528213E1C30100BCB02A /* GLibFacade.m */,
-				65F0B6D713DF4C6B00D0980C /* MarkdownMacPrefix.h */,
 				65F0B6F313DF4D9800D0980C /* glib.h */,
 				65F89E8013E379ED006A34B8 /* Configuration */,
 				65F0B8B513DF6D4700D0980C /* Generated Sources */,
@@ -254,6 +254,19 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXLegacyTarget section */
+		65BDF4D813E6D0A100E8C5B3 /* MakefileBuild */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 65BDF4E013E6D0DE00E8C5B3 /* Build configuration list for PBXLegacyTarget "MakefileBuild" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			dependencies = (
+			);
+			name = MakefileBuild;
+			passBuildSettingsInEnvironment = 1;
+			productName = MakefileBuild;
+		};
 		65F0B88813DF6C0D00D0980C /* Peg */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
@@ -335,6 +348,7 @@
 				4AFA466113E3624F00CFA132 /* libMultiMarkdown */,
 				65F0B88813DF6C0D00D0980C /* Peg */,
 				65F0B8EA13DF714E00D0980C /* Run Tests */,
+				65BDF4D813E6D0A100E8C5B3 /* MakefileBuild */,
 			);
 		};
 /* End PBXProject section */
@@ -558,6 +572,34 @@
 			};
 			name = "Release10.6+";
 		};
+		65BDF4D913E6D0A200E8C5B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = MakefileBuild;
+			};
+			name = Debug;
+		};
+		65BDF4DA13E6D0A200E8C5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = MakefileBuild;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		65BDF4DB13E6D0A200E8C5B3 /* Release10.6+ */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = MakefileBuild;
+			};
+			name = "Release10.6+";
+		};
 		65F0B88913DF6C0D00D0980C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -629,6 +671,16 @@
 				4AFA467113E3624F00CFA132 /* Debug */,
 				4AFA467213E3624F00CFA132 /* Release */,
 				4AFA467313E3624F00CFA132 /* Release10.6+ */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		65BDF4E013E6D0DE00E8C5B3 /* Build configuration list for PBXLegacyTarget "MakefileBuild" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				65BDF4D913E6D0A200E8C5B3 /* Debug */,
+				65BDF4DA13E6D0A200E8C5B3 /* Release */,
+				65BDF4DB13E6D0A200E8C5B3 /* Release10.6+ */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
