@@ -76,6 +76,7 @@
 		651A525B13E1BEFE00BCB02A /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO.txt; sourceTree = "<group>"; };
 		651A528113E1C30100BCB02A /* GLibFacade.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLibFacade.h; sourceTree = "<group>"; };
 		651A528213E1C30100BCB02A /* GLibFacade.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLibFacade.m; sourceTree = "<group>"; };
+		65BDF94813E9C47500E8C5B3 /* MultiMarkdownTool.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = MultiMarkdownTool.plist; sourceTree = "<group>"; };
 		65F0B66113DF47CC00D0980C /* markdown_lib.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = markdown_lib.c; sourceTree = "<group>"; };
 		65F0B66213DF47CC00D0980C /* markdown_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = markdown_lib.h; sourceTree = "<group>"; };
 		65F0B66313DF47CC00D0980C /* markdown_output.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = markdown_output.c; sourceTree = "<group>"; };
@@ -138,6 +139,7 @@
 				651A528113E1C30100BCB02A /* GLibFacade.h */,
 				651A528213E1C30100BCB02A /* GLibFacade.m */,
 				65F0B6F313DF4D9800D0980C /* glib.h */,
+				65BDF94813E9C47500E8C5B3 /* MultiMarkdownTool.plist */,
 				65F89E8013E379ED006A34B8 /* Configuration */,
 				65F0B8B513DF6D4700D0980C /* Generated Sources */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -431,7 +433,14 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				HEADER_SEARCH_PATHS = .;
+				INFOPLIST_FILE = MultiMarkdownTool.plist;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(INFOPLIST_FILE)",
+				);
 				PRODUCT_NAME = multimarkdown;
 			};
 			name = Debug;
@@ -445,8 +454,15 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = MarkdownMacPrefix.h;
 				HEADER_SEARCH_PATHS = .;
+				INFOPLIST_FILE = MultiMarkdownTool.plist;
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_CFLAGS = "-DSTANDALONE_MAC_VERSION=1";
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(INFOPLIST_FILE)",
+				);
 				PRODUCT_NAME = multimarkdown;
 				SEPARATE_STRIP = YES;
 				STRIP_INSTALLED_PRODUCT = YES;
@@ -545,7 +561,14 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				HEADER_SEARCH_PATHS = .;
+				INFOPLIST_FILE = MultiMarkdownTool.plist;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					"$(INFOPLIST_FILE)",
+				);
 				PRODUCT_NAME = multimarkdown;
 			};
 			name = "Release10.6+";
