@@ -1,8 +1,10 @@
 /*
- *	GLibFacade.m
+ *	GLibFacade.c
  *	MultiMarkdown
  *	
  *	Created by Daniel Jalkut on 7/26/11.
+ *  Modified by Fletcher T. Penney on 9/15/11.
+ *  Modified by Dan Lowe on 1/3/12.
  *	Copyright 2011 __MyCompanyName__. All rights reserved.
  */
 
@@ -12,6 +14,41 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
+/*
+ * The following section came from:
+ *
+ *	http://lists-archives.org/mingw-users/12649-asprintf-missing-vsnprintf-
+ *		behaving-differently-and-_vsncprintf-undefined.html
+ *
+ * and
+ *
+ *	http://groups.google.com/group/jansson-users/browse_thread/thread/
+ *		76a88d63d9519978/041a7d0570de2d48?lnk=raot
+ */
+
+/* Solaris and Windows do not provide vasprintf() or asprintf(). */
+#if defined(__WIN32) || (defined(__SVR4) && defined(__sun))
+int vasprintf( char **sptr, char *fmt, va_list argv ) 
+{ 
+    int wanted = vsnprintf( *sptr = NULL, 0, fmt, argv ); 
+    if( (wanted > 0) && ((*sptr = malloc( 1 + wanted )) != NULL) ) 
+        return vsprintf( *sptr, fmt, argv ); 
+ 
+    return wanted; 
+} 
+ 
+int asprintf( char **sptr, char *fmt, ... ) 
+{ 
+    int retval; 
+    va_list argv; 
+    va_start( argv, fmt ); 
+    retval = vasprintf( sptr, fmt, argv ); 
+    va_end( argv ); 
+    return retval; 
+} 
+#endif
+
 
 /* GString */
 
@@ -69,7 +106,16 @@ static void ensureStringBufferCanHold(GString* baseString, size_t newStringSize)
 			newBufferSize *= kStringBufferGrowthMultiplier;
 		}
 		
-		baseString->str = realloc(baseString->str, newBufferSize);
+        char *temp;
+        temp = realloc(baseString->str, newBufferSize);
+        
+        if (temp == NULL) {
+            /* realloc failed */
+            fprintf(stderr, "error reallocating memory\n");
+
+            exit(1);
+        }
+		baseString->str = temp;
 		baseString->currentStringBufferSize = newBufferSize;
 	}
 }
@@ -110,6 +156,7 @@ void g_string_append_printf(GString* baseString, char* format, ...)
 		g_string_append(baseString, formattedString);
 		free(formattedString);
 	}
+	va_end(args);
 } 
 
 void g_string_prepend(GString* baseString, char* prependedString)

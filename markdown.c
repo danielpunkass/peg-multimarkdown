@@ -3,7 +3,7 @@
   markdown.c - markdown in C using a PEG grammar.
   (c) 2008 John MacFarlane (jgm at berkeley dot edu).
   
-  portions Copyright (c) 2010-2011 Fletcher T. Penney
+  portions Copyright (c) 2010-2013 Fletcher T. Penney
   portions Copyright (c) 2011 Daniel Jalkut
   
   This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <string.h>
 #include <assert.h>
 #include <getopt.h>
-#include <glib.h>
+#include "glib.h"
 #include "markdown_peg.h"
 
 static int extensions;
@@ -37,8 +37,8 @@ static int extensions;
 
  ***********************************************************************/
 
-#define VERSION "3.1b1-redsweater"
-#define COPYRIGHT "portions Copyright (c) 2010-2011 Fletcher T. Penney.\n" \
+#define VERSION "3.7-redsweater"
+#define COPYRIGHT "portions Copyright (c) 2010-2013 Fletcher T. Penney.\n" \
 				  "portions Copyright (c) 2011 Daniel Jalkut, MIT licensed.\n" \
                   "original Copyright (c) 2008-2009 John MacFarlane.  License GPLv2+ or MIT.\n" \
                   "This is free software: you are free to change and redistribute it.\n" \
@@ -79,6 +79,7 @@ Syntax extensions\n\
   --smart --nosmart       toggle smart typography extension\n\
   --notes --nonotes       toggle notes extension\n\
   --process-html          process MultiMarkdown inside of raw HTML\n\
+  --nolabels              do not generate id attributes for headers\n\
 \n\
 Converts text in specified files (or stdin) from markdown to FORMAT.\n\
 Available FORMATs:  html, latex, memoir, beamer, odf, opml\n");
@@ -136,6 +137,7 @@ int main(int argc, char * argv[]) {
       MD_ARGUMENT_FLAG( "notes", 0, 1, &opt_notes, "use notes extension (on by default)", NULL ),
       MD_ARGUMENT_FLAG( "nonotes", 0, 1, &opt_no_notes, "do not use notes extension", NULL ),
       MD_ARGUMENT_FLAG( "process-html", 0, 1, &opt_process_html, "process MultiMarkdown inside of raw HTML", NULL ),
+      MD_ARGUMENT_FLAG( "nolabels", 0, 1, &opt_no_labels, "do not generate id attributes for headers", NULL ),
       { NULL }
     };
 

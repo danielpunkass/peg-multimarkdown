@@ -1,7 +1,4 @@
-ALL : multimarkdown
-
-VERSION=3.1b1
-
+VERSION=3.7
 PROGRAM=multimarkdown
 
 UNAME=$(shell uname)
@@ -9,23 +6,48 @@ UNAME=$(shell uname)
 ifeq ($(UNAME), Darwin)
 define FINALNOTES
  ***\n\
-*** WARNING: Since you are on Darwin, you probably meant to use the Xcode version instead.\n\
-*** It does lots of nice magic like producing a version of the binary that is capable\n\
-*** of running on multiple versions of Mac OS X and with a variety of CPU architectures.\n\
+*** WARNING: Since you are on Darwin, you probably meant to use the Xcode\n\
+*** version instead.\n\
+*** It produces a version of the binary that is capable of running on\n\
+*** multiple versions of Mac OS X and on PPC, i386, or x86_64 machines.\n\
 ***
 endef
 else
 	FINALNOTES=Build complete.
 endif
-	
-CFLAGS ?= -Wall -O3 -ansi -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1
 
-OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
-PEGDIR=peg-0.1.4
-LEG=$(PEGDIR)/leg
+CFLAGS ?= -Wall -O3 -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1 -D_GNU_SOURCE
+ifeq ($(UNAME), SunOS)
+	CC = gcc
+	# Use of <stdbool.h> is valid only in a c99 compilation environment
+	CFLAGS += --std=c99
+else
+	CFLAGS += -ansi
+endif
 
-$(LEG):
-	CC=gcc make -C $(PEGDIR)
+# make ARCH=ppc
+# build for ppc architecture - Only works on machines with PPC compilation support installed
+# probably only Snow Leopard machines with Xcode 3 installed
+ifeq ($(ARCH), ppc)
+	CFLAGS += -arch ppc
+endif
+
+# make ARCH=i386
+# build for i386 architecture - useful with older machines or those running 10.4?
+ifeq ($(ARCH), i386)
+	CFLAGS += -arch i386
+endif
+
+CFLAGS ?= -Wall -O3 -ansi -D_GNU_SOURCE # -flto for newer GCC versions
+OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o utility_functions.o parsing_functions.o odf.o
+PEGDIR=peg-0.1.9
+LEG=$(PEGDIR)/leg$(X)
+PKG_CONFIG = pkg-config
+
+ALL : $(PROGRAM)
+
+$(LEG): $(PEGDIR)
+	CC=gcc $(MAKE) -C $(PEGDIR)
 
 %.o : %.c markdown_peg.h
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -41,36 +63,37 @@ markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.
 
 clean:
 	rm -f markdown_parser.c $(PROGRAM) $(OBJS); \
-	make -C $(PEGDIR) clean; \
 	rm -rf mac_installer/Package_Root/usr/local/bin; \
+	rm -rf mac_installer/Support_Root; \
 	rm mac_installer/Resources/*.html; \
 	rm windows_installer/README.txt; \
 	rm windows_installer/multimarkdown.exe; \
 	rm windows_installer/multimarkdown.xml.backup; \
-	rm windows_installer/LICENSE.html
+	rm windows_installer/LICENSE.html; \
+	rm -rf mac_installer/*.pkg
 
 distclean: clean
-	make -C $(PEGDIR) spotless
+	$(MAKE) -C $(PEGDIR) clean
 
 test: $(PROGRAM)
 	cd MarkdownTest; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --Tidy  --Flags="--compatibility"
 
-mmdtest: $(PROGRAM)
+mmd-test: $(PROGRAM)
 	cd MarkdownTest; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --testdir=MultiMarkdownTests
 
-compattest: $(PROGRAM)
+compat-test: $(PROGRAM)
 	cd MarkdownTest; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --testdir=CompatibilityTests --Flags="--compatibility"
 
-latextest: $(PROGRAM)
+latex-test: $(PROGRAM)
 	cd MarkdownTest; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --testdir=MultiMarkdownTests --Flags="-t latex" --ext=".tex"; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --testdir=BeamerTests --Flags="-t latex" --ext=".tex"; \
 	./MarkdownTest.pl --Script=../$(PROGRAM) --testdir=MemoirTests --Flags="-t latex" --ext=".tex"
 
-xslttest: $(PROGRAM)
+xslt-test: $(PROGRAM)
 	cd MarkdownTest; \
 	./MarkdownTest.pl --Script=/bin/cat --testdir=MultiMarkdownTests \
 	--TrailFlags="| ../Support/bin/mmd2tex-xslt" --ext=".tex"; \
@@ -82,17 +105,63 @@ xslttest: $(PROGRAM)
 leak-check: $(PROGRAM)
 	valgrind --leak-check=full ./multimarkdown TEST.markdown > TEST.html
 
-win-installer:
+
+# Compile multimarkdown.exe and prep files necessary for installer
+
+windows: $(PROGRAM)
+	rm *.o
+	/usr/bin/i586-mingw32msvc-cc -c -Wall -O3 -ansi markdown*.c GLibFacade.c
+	/usr/bin/i586-mingw32msvc-cc markdown*.o GLibFacade.o \
+	-Wl,--dy,--warn-unresolved-symbols,-lglib-2.0 -o multimarkdown.exe
+
+# Get readme and other files ready
+# This has to be run before BitRock can create the installer
+win-prep:
+	mkdir -p windows_installer
+	cp multimarkdown.exe windows_installer/
 	cp README.markdown windows_installer/README.txt
 	./multimarkdown LICENSE > windows_installer/LICENSE.html
-	zip -r windows_installer/MultiMarkdown-Windows-$(VERSION).zip windows_installer/MMD-windows*.exe -x windows_installer/MultiMarkdown*.zip
 
-mac-installer: $(PROGRAM)
-	mkdir mac_installer/Package_Root/usr/local/bin
+# After building the installer with BitRock, this creates a properly named
+# zipfile
+# You have to move the .exe from BitRock to the windows_installer folder
+# Also - create a portable mmd zipfile
+win-installer:
+	zip -r windows_installer/MultiMarkdown-Windows-$(VERSION).zip windows_installer/MMD-windows-$(VERSION).exe -x windows_installer/MultiMarkdown*.zip
+	cd windows_installer; zip -r MultiMarkdown-Windows-Portable-$(VERSION).zip *.bat multimarkdown.exe README.txt LICENSE.html -x install_multimarkdown.bat
+
+# Build Mac installer - requires that you first build multimarkdown itself,
+# either with "make" or with Xcode
+
+mac-installer: 
+	mkdir -p mac_installer/Package_Root/usr/local/bin
+	mkdir -p mac_installer/Support_Root/Library/Application\ Support
 	cp multimarkdown scripts/mmd* mac_installer/Package_Root/usr/local/bin/
 	./multimarkdown README > mac_installer/Resources/README.html
 	./multimarkdown mac_installer/Resources/Welcome.txt > mac_installer/Resources/Welcome.html
 	./multimarkdown LICENSE > mac_installer/Resources/License.html
+	./multimarkdown mac_installer/Resources/Support_Welcome.txt > mac_installer/Resources/Support_Welcome.html
+	git clone Support mac_installer/Support_Root/Library/Application\ Support/MultiMarkdown
+	cd mac_installer; /Applications/PackageMaker.app/Contents/MacOS/PackageMaker \
+	--doc "Make Support Installer.pmdoc" \
+	--title "MultiMarkdown Support Files" \
+	--version $(VERSION) \
+	--filter "\.DS_Store" \
+	--filter "\.git" \
+	--id net.fletcherpenney.MMD-Support.pkg \
+	--domain user \
+	--out "MultiMarkdown-Support-Mac-$(VERSION).pkg" \
+	--no-relocate; \
+	/Applications/PackageMaker.app/Contents/MacOS/PackageMaker \
+	--doc "Make OS X Installer.pmdoc" \
+	--title "MultiMarkdown" \
+	--version $(VERSION) \
+	--filter "\.DS_Store" \
+	--filter "\.git" \
+	--id net.fletcherpenney.multimarkdown.pkg \
+	--out "MultiMarkdown-Mac-$(VERSION).pkg"
+	cd mac_installer; zip -r MultiMarkdown-Mac-$(VERSION).zip MultiMarkdown-Mac-$(VERSION).pkg
+	cd mac_installer; zip -r MultiMarkdown-Support-Mac-$(VERSION).zip MultiMarkdown-Support-Mac-$(VERSION).pkg	
 
 # Requires installation of the platypus command line tool to create
 # a drag and drop application for Mac OS X
@@ -104,14 +173,20 @@ drop:
 	/usr/local/bin/platypus -D -a 'MMD to OPML' -o 'Text Window' -p '/bin/sh' -V '3.0'  -I 'net.fletcherpenney.MMD2OPML' -X '*' -T '****|fold'  -N 'PATH=/usr/local/bin'  -c 'scripts/mmd2opml' 'drag/MMD2OPML.app'; \
 	/usr/local/bin/platypus -D -a 'MMD to ODF' -o 'Text Window' -p '/bin/sh' -V '3.0'  -I 'net.fletcherpenney.MMD2ODF' -X '*' -T '****|fold'  -N 'PATH=/usr/local/bin'  -c 'scripts/mmd2odf' 'drag/MMD2ODF.app'; 
 
+# Create HTML and PDF (if latex installed) documentation
 docs: $(PROGRAM)
 	cd documentation; \
 	../Support/Utilities/mmd_merge.pl index.txt > manual.txt; \
+	mkdir -p ../manual; \
 	../multimarkdown manual.txt > ../manual/index.html; \
 	../multimarkdown -b -t latex manual.txt; \
-	latexmk manual.tex; \
+	latexmk -pdf manual.tex; \
 	latexmk -c manual.tex; \
 	mv manual.pdf ../manual/mmd-manual.pdf; \
-	cd ../manual; git add mmd-manual.pdf index.html; \
-	git commit -m "update manual"; git push origin gh-pages; \
 	rm ../documentation/manual.t*;
+
+
+# For me to push updated documentation to my github site
+docs-live: docs
+	cd manual; git add mmd-manual.pdf index.html; \
+	git commit -m "update manual"; git push origin gh-pages; \
