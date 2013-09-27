@@ -1162,10 +1162,10 @@ AutoLabels = ( &{ !extension(EXT_COMPATIBILITY) && !extension(EXT_NO_LABELS)}
                 g_string_free(label,true);
                 /* TODO: this causes segfault when trying to use a footnote in the header */
                 /* I would like to fix it at some point */
-                /*fprintf(stderr,"try to free list\n");
-                /* my_print_tree(b,0);
-                free_element_list(b);
-                fprintf(stderr,"freed list\n"); */
+                /*fprintf(stderr,"try to free list\n"); */
+                /* my_print_tree(b,0); */
+                /* free_element_list(b); */
+                /* fprintf(stderr,"freed list\n"); */
             } | c:TableCaption {
                 GString *label = g_string_new("");
                 char *lab;
